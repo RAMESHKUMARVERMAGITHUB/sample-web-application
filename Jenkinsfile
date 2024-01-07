@@ -27,8 +27,9 @@ pipeline{
         stage("Sonarqube Analysis "){
             steps{
                 withSonarQubeEnv('sonar-server') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=sample-web-application \
-                    -Dsonar.projectKey=sample-web-application'''
+                    // sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=sample-web-application \
+                    // -Dsonar.projectKey=sample-web-application'''
+                    sh "mvn sonar:sonar"
                 }
             }
         }
@@ -75,7 +76,7 @@ pipeline{
         //     steps{
         //         sh "docker stop sample-web-application || true"  // Stop the container if it's running, ignore errors
         //         sh "docker rm sample-web-application || true" 
-        //         sh "docker run -d --name sample-web-application -p 4000:3000 rameshkumarverma/sample-web-application:latest"
+        //         sh "docker run -d --name sample-web-application -p 8080:8080 rameshkumarverma/sample-web-application:latest"
         //     }
         // }
       stage('Deploy to Kubernetes') {
@@ -85,7 +86,7 @@ pipeline{
                         withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'k8s', namespace: '', restrictKubeConfigAccess: false, serverUrl: '') {
                             // Apply deployment and service YAML files
                             sh 'kubectl apply -f deployment.yml'
-                            sh 'kubectl apply -f service.yml'
+                            // sh 'kubectl apply -f service.yml'
 
                             // Get the external IP or hostname of the service
                             // def externalIP = sh(script: 'kubectl get svc amazon-service -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"', returnStdout: true).trim()
