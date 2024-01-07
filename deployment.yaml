@@ -15,8 +15,7 @@ spec:
       - name: devops-training
         image:rameshkumarverma/sample-web-application:latest
         ports:
-            - name: http
-              containerPort: 8080
+        - containerPort: 8080
   replicas: 2
 ---
 apiVersion: v1
