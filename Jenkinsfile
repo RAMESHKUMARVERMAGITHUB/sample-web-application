@@ -3,6 +3,7 @@ pipeline{
     tools{
         jdk 'jdk17'
         nodejs 'node16'
+        maven 'maven'
     }
     environment {
         SCANNER_HOME=tool 'sonar-scanner'
@@ -15,14 +16,20 @@ pipeline{
         }
         stage('Checkout from Git'){
             steps{
-                git branch: 'main', url: 'https://github.com/rameshkumarvermagithub/flaskapp.git'
+                git branch: 'ansible-sonar', url: 'https://github.com/rameshkumarvermagithub/sample-web-application.git'
             }
         }
+    //   stage('Build code') {
+    //         steps {
+    //             sh "mvn clean package"
+    //         }
+    //     }
         stage("Sonarqube Analysis "){
             steps{
                 withSonarQubeEnv('sonar-server') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=flaskapp \
-                    -Dsonar.projectKey=flaskapp'''
+                    // sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=sample-web-application \
+                    // -Dsonar.projectKey=sample-web-application'''
+                    sh "mvn sonar:sonar"
                 }
             }
         }
@@ -53,23 +60,24 @@ pipeline{
             steps{
                 script{
                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){
-                       sh "docker build -t flaskapp ."
-                       sh "docker tag flaskapp rameshkumarverma/flaskapp:latest"
-                       sh "docker push rameshkumarverma/flaskapp:latest"
+                       sh "docker pull deekshithsn/devops-training:5a3b37328d466cd20c366bab5a8f0216a19bacee"
+                    //   sh "docker build -t rameshkumarverma/sample-web-application:latest ."
+                      sh "docker tag deekshithsn/devops-training:5a3b37328d466cd20c366bab5a8f0216a19bacee rameshkumarverma/sample-web-application:latest"
+                       sh "docker push rameshkumarverma/sample-web-application:latest"
                     }
                 }
             }
         }
         stage("TRIVY"){
             steps{
-                sh "trivy image rameshkumarverma/flaskapp:latest > trivyimage.txt"
+                sh "trivy image rameshkumarverma/sample-web-application:latest > trivyimage.txt"
             }
         }
         // stage("deploy_docker"){
         //     steps{
-        //         sh "docker stop flaskapp || true"  // Stop the container if it's running, ignore errors
-        //         sh "docker rm flaskapp || true" 
-        //         sh "docker run -d --name amazon -p 4000:3000 rameshkumarverma/flaskapp:latest"
+        //         sh "docker stop sample-web-application || true"  // Stop the container if it's running, ignore errors
+        //         sh "docker rm sample-web-application || true" 
+        //         sh "docker run -d --name sample-web-application -p 8080:8080 rameshkumarverma/sample-web-application:latest"
         //     }
         // }
       stage('Deploy to Kubernetes') {
@@ -78,8 +86,8 @@ pipeline{
                     // dir('K8S') {
                         withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'k8s', namespace: '', restrictKubeConfigAccess: false, serverUrl: '') {
                             // Apply deployment and service YAML files
-                            sh 'kubectl apply -f deployment.yml'
-                            sh 'kubectl apply -f service.yml'
+                            sh 'kubectl apply -f deployment.yaml'
+                            sh 'kubectl apply -f service.yaml'
 
                             // Get the external IP or hostname of the service
                             // def externalIP = sh(script: 'kubectl get svc amazon-service -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"', returnStdout: true).trim()
