@@ -1,35 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: devops-training
+  name: amazon-deployment
 spec:
+  replicas: 2  # Number of desired replicas
   selector:
     matchLabels:
-      app: devops-training
+      app: amazon
   template:
     metadata:
       labels:
-        app: devops-training
+        app: amazon
     spec:
       containers:
-      - name: devops-training
-        image:rameshkumarverma/sample-web-application:latest
+      - name: amazon
+        image: rameshkumarverma/sample-web-application:latest
         ports:
         - containerPort: 8080
-  replicas: 2
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: devops-training-app-service
-  labels:
-    app: devops-training
-spec:
-  type: NodePort
-  ports:
-  - port: 8080
-    nodePort: 31884
-    protocol: TCP
-    name: http
-  selector:
-    app: devops-training
